@@ -1,0 +1,28 @@
+# One-click deploy for Render.
+#
+#   render.com  ->  New  ->  Blueprint  ->  point at this repo  ->  Apply
+#
+# Everything the app needs is set below. HUB_MODE=public switches off the
+# file reader and the rescan button, because on a hosted copy there is no
+# personal workspace behind it and those endpoints must not be reachable.
+# HOST=0.0.0.0 is what lets the platform reach the server; the default
+# 127.0.0.1 in hub_config.py is deliberately local-only.
+services:
+  - type: web
+    name: abhijeet-work-hub
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    healthCheckPath: /
+    envVars:
+      - key: HUB_MODE
+        value: public
+      - key: HOST
+        value: 0.0.0.0
+      - key: OWNER_NAME
+        value: Abhijeet
+      - key: APP_TITLE
+        value: Abhijeet Work Hub
+      # SECRET_KEY is deliberately absent. app.py generates a random one on
+      # first boot and keeps it in the instance disk; nothing to paste here.

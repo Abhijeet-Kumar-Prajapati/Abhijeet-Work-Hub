@@ -42,6 +42,8 @@
   let CAT = { meta: {}, categories: [] };
   let ALL = [];          // flat list of projects
   let activeFilter = "all";
+  let activeTech = "";   // set when a skill chip is clicked
+  let VIEW = "dashboard";// last view shown, so Back returns here
 
   function readEmbedded() {
     const el = document.getElementById("catalog-data");
@@ -69,13 +71,29 @@
     buildUI();
   }
 
+  // ---------------------------------------------------- address bar
+  /* Every view and every project gets a real URL, so a link can be copied
+     and shared and the browser Back button behaves the way people expect. */
+  function setHash(h) {
+    const want = "#/" + h;
+    if (location.hash !== want) history.pushState(null, "", want);
+  }
+  function readHash() {
+    const m = /^#\/([a-z]+)(?:\/(.+))?$/i.exec(location.hash || "");
+    return m ? { kind: m[1].toLowerCase(), arg: m[2] ? decodeURIComponent(m[2]) : "" } : null;
+  }
+
   // ---------------------------------------------------- navigation
-  function show(view) {
+  function show(view, push) {
+    const target = $("#v-" + view);
+    if (!target) return;
     $$(".view").forEach((v) => v.classList.remove("active"));
-    $("#v-" + view).classList.add("active");
+    target.classList.add("active");
+    VIEW = view;
     $$(".nav-item").forEach((n) =>
       n.classList.toggle("active", n.dataset.view === view));
     window.scrollTo({ top: 0, behavior: "smooth" });
+    if (push !== false) setHash("v/" + view);
   }
 
   $$(".nav-item").forEach((n) =>
@@ -98,6 +116,15 @@
         "<code>python app.py</code>";
       $(".main").insertBefore(b, $(".main").firstChild);
       $("#wMode").innerHTML = "⚠ Offline mode - the wallet runs with demo data saved in your browser.";
+    }
+
+    /* On a published copy (static build or a public host) there is no Flask
+       API behind the page, so anything that needs the server is hidden
+       instead of left behind as a button that cannot work. */
+    if (PUBLIC_MODE) {
+      $$("[data-needs-server]").forEach((el) => (el.style.display = "none"));
+      const holder = $("#rescanHolder");
+      if (holder) holder.style.display = "none";
     }
 
     renderStats();
@@ -129,7 +156,7 @@
     ).join("");
   }
 
-  function cardHTML(p) {
+  function cardHTML(p, q) {
     const live = p.demo
       ? `<span class="live">&#9679; LIVE DEMO</span>`
       : (p.exists ? "" : `<span class="missing">folder not found</span>`);
@@ -138,13 +165,13 @@
         <div class="card-head">
           <div class="card-ico">${ICONS[p.categoryId] || "◆"}</div>
           <div>
-            <h3>${esc(p.title)}</h3>
+            <h3>${mark(p.title, q)}</h3>
             <div class="cat">${esc(p.categoryTitle)}</div>
           </div>
         </div>
-        <p>${esc(p.desc)}</p>
+        <p>${mark(p.desc, q)}</p>
         <div class="pills">${p.tech.slice(0, 4).map((t, i) =>
-          `<span class="pill ${i % 2 ? "alt" : ""}">${esc(t)}</span>`).join("")}</div>
+          `<span class="pill ${i % 2 ? "alt" : ""}">${mark(t, q)}</span>`).join("")}</div>
         <div class="card-foot">
           ${live}
           <span>${p.files} files</span>
@@ -194,18 +221,59 @@
       `<button class="chip ${c.id === activeFilter ? "on" : ""}" data-f="${c.id}">
         ${esc(c.title)} <span style="opacity:.6">${c.n}</span></button>`).join("");
     $$("#filters .chip").forEach((b) =>
-      (b.onclick = () => { activeFilter = b.dataset.f; renderFilters(); renderProjects(); }));
+      (b.onclick = () => { activeFilter = b.dataset.f; renderProjects(); }));
+  }
+
+  /* the "you are filtering by Python" reminder strip */
+  function renderActiveFilter() {
+    const el = $("#activeFilter");
+    if (!activeTech) { el.style.display = "none"; el.innerHTML = ""; return; }
+    el.style.display = "block";
+    el.innerHTML =
+      `<div class="af-in">Showing every project built with <b>${esc(activeTech)}</b>
+        <button id="afClear" title="Remove this filter">&#10005;</button></div>`;
+    $("#afClear").onclick = () => { activeTech = ""; renderProjects(); };
+  }
+
+  const SORTS = {
+    new:   (a, b) => (b.date || "").localeCompare(a.date || ""),
+    old:   (a, b) => (a.date || "").localeCompare(b.date || ""),
+    az:    (a, b) => String(a.title).localeCompare(String(b.title)),
+    za:    (a, b) => String(b.title).localeCompare(String(a.title)),
+    big:   (a, b) => (b.kb || 0) - (a.kb || 0),
+    small: (a, b) => (a.kb || 0) - (b.kb || 0)
+  };
+
+  /* wrap each hit of q inside text that has ALREADY been escaped, so the
+     highlight can never open an injection hole */
+  function mark(text, q) {
+    const s = esc(text);
+    if (!q) return s;
+    const needle = esc(q).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (!needle) return s;
+    return s.replace(new RegExp("(" + needle + ")", "gi"), "<mark>$1</mark>");
   }
 
   function renderProjects() {
-    const q = ($("#search").value || "").toLowerCase().trim();
+    const wrap = $("#searchWrap");
+    const raw = $("#search").value || "";
+    const q = raw.toLowerCase().trim();
+    if (wrap) wrap.classList.toggle("filled", !!raw);
+
     let list = ALL.filter((p) => activeFilter === "all" || p.categoryId === activeFilter);
+    if (activeTech) list = list.filter((p) => p.tech.indexOf(activeTech) !== -1);
     if (q) {
       list = list.filter((p) =>
         (p.title + " " + p.desc + " " + p.tech.join(" ")).toLowerCase().includes(q));
     }
-    $("#allProjects").innerHTML = list.map(cardHTML).join("");
+    list = list.slice().sort(SORTS[$("#sortSel").value] || SORTS.new);
+
+    $("#allProjects").innerHTML = list.map((p) => cardHTML(p, q)).join("");
     $("#noResult").style.display = list.length ? "none" : "block";
+    $("#resCount").innerHTML = list.length === ALL.length
+      ? "<b>" + ALL.length + "</b> projects"
+      : "<b>" + list.length + "</b> of " + ALL.length + " projects";
+    renderActiveFilter();
     wireCards($("#allProjects"));
   }
 
@@ -222,9 +290,10 @@
   $("#search").addEventListener("input", renderProjects);
 
   // ---------------------------------------------------- project modal
-  function openProject(id) {
+  function openProject(id, push) {
     const p = ALL.find((x) => x.id === id);
     if (!p) return;
+    if (push !== false) setHash("p/" + id);
 
     let html = `
       <button class="modal-close" id="mClose">✕</button>
@@ -244,6 +313,7 @@
     html += `<div class="meta-row">
       ${p.demo ? `<button class="btn primary" id="mDemo">▶ Open live demo</button>` : ""}
       ${(PUBLIC_MODE || !p.exists) ? "" : `<button class="btn" id="mCode">&#8984; View code</button>`}
+      <button class="btn" id="mShare">&#128279; Copy link</button>
     </div>`;
 
     const box = $("#modalBox");
@@ -260,11 +330,24 @@
     if (codeBtn) codeBtn.onclick = () => {
       closeModal(); show("code"); $("#cbProj").value = p.id; openCode(p);
     };
+    $("#mShare").onclick = async () => {
+      const url = location.origin + location.pathname + "#/p/" + p.id;
+      try {
+        await navigator.clipboard.writeText(url);
+        toast("Link copied - anyone can open this project");
+      } catch (e) {
+        toast("Copy blocked by the browser - use the address bar");
+      }
+    };
   }
 
-  function closeModal() { $("#modal").classList.remove("open"); }
+  function closeModal() {
+    if (!$("#modal").classList.contains("open")) return;
+    $("#modal").classList.remove("open");
+    const h = readHash();
+    if (h && h.kind === "p") setHash("v/" + VIEW);
+  }
   $("#modal").onclick = (e) => { if (e.target.id === "modal") closeModal(); };
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
 
   // ======================================================= DEMOS
   $$("#demoTabs .tab").forEach((t) =>
@@ -451,9 +534,15 @@
   let LS_ACCT = null;
   function loadWallet() {
     if (!ON_FLASK) return loadWalletLocal();
-    api("/api/wallet").then(walletRender).catch(() => loadWalletLocal());
+    api("/api/wallet").then(walletRender).catch(() => loadWalletLocal(true));
   }
-  function loadWalletLocal() {
+  /* reach=true means we are on a real page but there is no API behind it,
+     which is the case for the published static copy */
+  function loadWalletLocal(reach) {
+    if (reach) {
+      $("#wMode").innerHTML = "&#9432; <b>Demo mode</b> - this copy is published as a plain website, " +
+        "so transfers are kept in your browser and reset on reload.";
+    }
     if (!LS_ACCT) {
       LS_ACCT = [
         { id: 1, name: "Demo User", email: "user1@example.com", balance: 12500 },
@@ -463,7 +552,7 @@
       ];
     }
     walletRender(LS_ACCT);
-    $("#wHist").innerHTML = "<li style='color:var(--faint)'>Offline demo — history resets on reload.</li>";
+    $("#wHist").innerHTML = "<li style='color:var(--faint)'>Demo mode — history resets on reload.</li>";
   }
 
   function walletRender(accts) {
@@ -530,12 +619,14 @@
 
   // ======================================================= CODE BROWSER
   function renderCodePicker() {
+    const sel = $("#cbProj");
+    if (!sel) return;                     // hidden in public mode
     const cats = CAT.categories.map((c) =>
       `<optgroup label="${esc(c.title)}">${
         c.projects.filter((p) => p.exists).map((p) =>
           `<option value="${p.id}">${esc(p.title)}</option>`).join("")
       }</optgroup>`).join("");
-    $("#cbProj").innerHTML = `<option value="">— choose a project —</option>` + cats;
+    sel.innerHTML = `<option value="">— choose a project —</option>` + cats;
   }
 
   function listMsg(t) { return `<div class="empty"><div class="e">📁</div>${t}</div>`; }
@@ -682,23 +773,39 @@
     const max = list.length ? list[0][1] : 1;
 
     $("#skillGrid").innerHTML = list.map(([name, n]) => `
-      <div class="card" style="cursor:default">
+      <div class="card skill-card" data-tech="${esc(name)}"
+           title="Show the ${n} project${n > 1 ? "s" : ""} that use ${esc(name)}">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
           <div class="card-ico">${esc(name[0].toUpperCase())}</div>
           <div><h3>${esc(name)}</h3><div class="cat">${n} project${n > 1 ? "s" : ""}</div></div>
         </div>
         <div class="bar-wrap"><div class="bar-fill" style="width:${(n / max) * 100}%"></div></div>
       </div>`).join("");
+
+    /* a skill card is a shortcut: jump to Projects, pre-filtered by that tech */
+    $$("#skillGrid .skill-card").forEach((el) =>
+      (el.onclick = () => {
+        activeTech = activeTech === el.dataset.tech ? "" : el.dataset.tech;
+        activeFilter = "all";
+        show("projects");
+        renderFilters();
+        renderProjects();
+        toast(activeTech
+          ? "Filtered by " + activeTech
+          : "Skill filter cleared");
+      }));
   }
 
   function renderTimeline() {
     const list = ALL.filter((p) => p.date).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 14);
     $("#timeline").innerHTML = list.map((p) => `
-      <div class="tl-item">
+      <div class="tl-item" data-id="${p.id}" title="Open ${esc(p.title)}">
         <div class="tl-date">${p.date}</div>
         <div class="tl-txt"><b>${esc(p.title)}</b>
           <span style="color:var(--faint)"> — ${esc(p.categoryTitle)}</span></div>
       </div>`).join("");
+    $$("#timeline .tl-item").forEach((el) =>
+      (el.onclick = () => openProject(el.dataset.id)));
   }
 
   // ======================================================= misc
@@ -723,5 +830,90 @@
     } catch (e) { toast("Rescan failed"); }
   };
 
-  loadCatalog();
+  // ======================================================= theme
+  const THEME_KEY = "ab_workhub_theme";
+  const themeNow = () => document.documentElement.dataset.theme || "dark";
+
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+    const lbl = $("#themeTxt");
+    if (lbl) lbl.textContent = t === "light" ? "Dark" : "Light";
+    const ico = $("#themeBtn .t-ico");
+    if (ico) ico.textContent = t === "light" ? "◑" : "◐";
+  }
+  function toggleTheme() {
+    const next = themeNow() === "light" ? "dark" : "light";
+    applyTheme(next);
+    toast(next === "light" ? "Light theme on" : "Dark theme on");
+  }
+  $("#themeBtn").onclick = toggleTheme;
+  applyTheme(themeNow());
+
+  // ======================================================= toolbar
+  $("#searchClear").onclick = () => {
+    $("#search").value = "";
+    renderProjects();
+    $("#search").focus();
+  };
+  $("#sortSel").onchange = renderProjects;
+
+  /* "Surprise me" opens something from whatever is on screen right now, so a
+     filtered or searched list stays consistent with what the click offers */
+  function openRandom() {
+    const shown = $$("#allProjects .card[data-id]").map((el) => el.dataset.id);
+    const pool = shown.length ? shown : ALL.map((p) => p.id);
+    if (!pool.length) return toast("Nothing to open right now");
+    openProject(pool[Math.floor(Math.random() * pool.length)]);
+  }
+  $("#randBtn").onclick = openRandom;
+
+  const toTop = $("#toTop");
+  toTop.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  window.addEventListener("scroll", () =>
+    toTop.classList.toggle("on", window.scrollY > 420), { passive: true });
+
+  // ======================================================= keyboard
+  const SHORTCUTS = [
+    ["/", "Jump straight to search"],
+    ["t", "Switch dark / light theme"],
+    ["r", "Open a random project"],
+    ["?", "Show this help"],
+    ["Esc", "Close the open dialog"]
+  ];
+
+  function openShortcuts() {
+    $("#modalBox").innerHTML =
+      `<button class="modal-close" id="mClose">&#10005;</button>
+       <h2>Keyboard shortcuts</h2>
+       <div class="sub">Drive the whole hub without touching the mouse.</div>
+       <div class="kbd-list">${SHORTCUTS.map(([k, d]) =>
+         `<div class="kbd-row"><span class="kd">${esc(d)}</span>
+            <span class="kk"><kbd>${esc(k)}</kbd></span></div>`).join("")}</div>`;
+    $("#modal").classList.add("open");
+    $("#mClose").onclick = closeModal;
+  }
+  $("#keysBtn").onclick = openShortcuts;
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") return closeModal();
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (e.key === "/") { e.preventDefault(); show("projects"); $("#search").focus(); return; }
+    if (e.key === "?") { e.preventDefault(); openShortcuts(); return; }
+    const k = e.key.toLowerCase();
+    if (k === "t") return toggleTheme();
+    if (k === "r") { e.preventDefault(); openRandom(); }
+  });
+
+  // ======================================================= deep links
+  function applyHash() {
+    const h = readHash();
+    if (!h) return;
+    if (h.kind === "p") { show("projects", false); openProject(h.arg, false); return; }
+    if (h.kind === "v") show(h.arg, false);
+  }
+  window.addEventListener("popstate", applyHash);
+
+  loadCatalog().then(applyHash);
 })();

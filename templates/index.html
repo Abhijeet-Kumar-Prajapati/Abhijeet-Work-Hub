@@ -6,6 +6,15 @@
 <title>{{ app_title }}</title>
 <meta name="description" content="Every project in one place - Flask apps, AI assistants, web projects and Android apps.">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script>
+/* Apply the saved theme before first paint so the page never flashes. */
+(function () {
+  try {
+    var t = localStorage.getItem("ab_workhub_theme");
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text y='72' x='50' text-anchor='middle' font-size='52' fill='white' font-family='sans-serif' font-weight='bold'>A</text></svg>">
 </head>
 <body>
@@ -26,7 +35,7 @@
     <div class="nav-item active" data-view="dashboard"><span class="ico">◈</span> Dashboard</div>
     <div class="nav-item" data-view="projects"><span class="ico">▦</span> Projects <span class="count" id="cProjects">0</span></div>
     <div class="nav-item" data-view="demos"><span class="ico">▶</span> Live Demos</div>
-    <div class="nav-item" data-view="code"><span class="ico">⌘</span> Code Browser</div>
+    <div class="nav-item" data-view="code" data-needs-server><span class="ico">⌘</span> Code Browser</div>
     <div class="nav-item" data-view="skills"><span class="ico">◑</span> Skills</div>
     <div class="nav-item" data-view="about"><span class="ico">◎</span> About</div>
 
@@ -35,6 +44,14 @@
         <b id="fProjects">0</b> projects<br>
         <b id="fFiles">0</b> files scanned<br>
         <span id="fGen">-</span>
+      </div>
+      <div class="side-tools">
+        <button class="tool" id="themeBtn" title="Switch between dark and light">
+          <span class="t-ico">◐</span><span class="t-txt" id="themeTxt">Light</span>
+        </button>
+        <button class="tool" id="keysBtn" title="Keyboard shortcuts">
+          <span class="t-ico">⌨</span><span class="t-txt">Keys</span>
+        </button>
       </div>
     </div>
   </aside>
@@ -77,8 +94,28 @@
         <p>Everything found on disk. Click any card for the full breakdown.</p>
       </div>
 
-      <input class="search" id="search" placeholder="&#9906;  Search by name, tech or description...">
+      <div class="search-wrap" id="searchWrap">
+        <input class="search" id="search" placeholder="&#9906;  Search by name, tech or description...">
+        <button class="s-clear" id="searchClear" title="Clear search">&#10005;</button>
+      </div>
       <div class="filters" id="filters"></div>
+      <div class="active-filter" id="activeFilter" style="display:none"></div>
+      <div class="toolbar">
+        <span class="result-count" id="resCount">-</span>
+        <div class="tool-right">
+          <button class="btn sm" id="randBtn" title="Open a random project">&#127922; Surprise me</button>
+          <label class="sort-wrap">Sort
+            <select id="sortSel">
+              <option value="new">Newest first</option>
+              <option value="old">Oldest first</option>
+              <option value="az">Name A to Z</option>
+              <option value="za">Name Z to A</option>
+              <option value="big">Largest first</option>
+              <option value="small">Smallest first</option>
+            </select>
+          </label>
+        </div>
+      </div>
       <div class="grid" id="allProjects"></div>
       <div class="empty" id="noResult" style="display:none">
         <div class="e">&#128269;</div>
@@ -225,10 +262,12 @@
 
         <div class="card" style="cursor:default">
           <div class="card-head"><div class="card-ico">&#9889;</div>
-            <div><h3>Two ways to run</h3><div class="cat">Flexible</div></div></div>
+            <div><h3>Three ways to run</h3><div class="cat">Flexible</div></div></div>
           <p>Start <b>app.py</b> for the full experience with a live database.
-             Or just double-click <b>templates/index.html</b> - it still works
-             using the bundled catalogue, with the wallet in offline demo mode.</p>
+             Run <b>python build_static.py</b> to publish the entire thing as a
+             plain website on GitHub Pages. Or just open
+             <b>templates/index.html</b> - it still works using the bundled
+             catalogue, with the wallet in offline demo mode.</p>
         </div>
 
         <div class="card" style="cursor:default">
@@ -258,10 +297,11 @@
         <div class="card" style="cursor:default">
           <div class="card-head"><div class="card-ico">&#128290;</div>
             <div><h3>Binds to localhost</h3><div class="cat">Network</div></div></div>
-          <p>The server listens on <code>127.0.0.1</code> only, so it is not
-             reachable from other machines unless you deliberately change
-             <code>HOST</code>. Set <code>HUB_MODE=public</code> to also
-             disable the file reader and rescan.</p>
+          <p>By default the server listens on <code>127.0.0.1</code> only, so it is
+             not reachable from other machines. To publish it, set
+             <code>HUB_MODE=public</code> (which also switches off the file
+             reader and rescan) and <code>HOST=0.0.0.0</code> so the platform
+             can reach it.</p>
         </div>
         <div class="card" style="cursor:default">
           <div class="card-head"><div class="card-ico">&#9919;</div>
@@ -279,7 +319,7 @@
            <code>.env</code> file. Copy <code>.env.example</code> to
            <code>.env</code> to change it - <code>.env</code> is git-ignored
            so it stays private.</p>
-        <div style="margin-top:12px"><button class="btn" id="rescan">&#8635; Rescan workspace</button></div>
+        <div style="margin-top:12px" id="rescanHolder"><button class="btn" id="rescan">&#8635; Rescan workspace</button></div>
       </div>
     </section>
 
@@ -292,6 +332,8 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<button class="to-top" id="toTop" title="Back to top" aria-label="Back to top">&#8593;</button>
 
 <script id="catalog-data" type="application/json">{{ catalog | tojson }}</script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
