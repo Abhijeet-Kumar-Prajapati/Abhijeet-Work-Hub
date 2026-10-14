@@ -102,6 +102,18 @@ def export(env, out_dir, ctx):
             print(f"  skip  {src} (template missing)")
             continue
         html = env.get_template(src).render(**{**ctx, **extra})
+
+        if dst == "index.html":
+            # Tell the frontend there is no API behind this page. Without
+            # it the page would still try /api/projects, which on a
+            # sub-path deployment resolves to the domain root and costs a
+            # few seconds of waiting on a request that must 404 anyway.
+            html = html.replace(
+                'data-hub-mode="public"',
+                'data-hub-mode="public" data-no-api="1"',
+                1,
+            )
+
         out_path = out_dir / dst
         out_path.parent.mkdir(parents=True, exist_ok=True)
         # utf-8 without a BOM: a BOM makes browsers ignore the charset

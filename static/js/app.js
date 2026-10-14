@@ -13,7 +13,12 @@
   const esc = (s) => String(s == null ? "" : s)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-  const ON_FLASK = location.protocol !== "file:";
+  /* STATIC_ONLY is set by build_static.py on the published copy. Without it
+     a page hosted under a sub-path would still fire /api/projects, which
+     resolves to the domain root, wait for a 404 and then fall back - a
+     few seconds of blank screen for a request that can never succeed. */
+  const STATIC_ONLY = document.documentElement.dataset.noApi === "1";
+  const ON_FLASK = location.protocol !== "file:" && !STATIC_ONLY;
   // set to true when the server runs with HUB_MODE=public, where the
   // code browser and rescan endpoints are disabled
   let PUBLIC_MODE = document.documentElement.dataset.hubMode === "public";
@@ -112,10 +117,16 @@
     if (!ON_FLASK) {
       const b = document.createElement("div");
       b.className = "standalone-banner";
-      b.innerHTML = "⚠ Running in <b>offline mode</b>. Start the Flask app for live data: " +
-        "<code>python app.py</code>";
+      b.innerHTML = STATIC_ONLY
+        ? "🌐 <b>Published copy</b> - the catalogue is baked into this page, so " +
+          "everything works straight from the browser with no server behind it."
+        : "⚠ Running in <b>offline mode</b>. Start the Flask app for live data: " +
+          "<code>python app.py</code>";
       $(".main").insertBefore(b, $(".main").firstChild);
-      $("#wMode").innerHTML = "⚠ Offline mode - the wallet runs with demo data saved in your browser.";
+      $("#wMode").innerHTML = STATIC_ONLY
+        ? "&#9432; <b>Demo mode</b> - this copy is published as a plain website, " +
+          "so transfers are kept in your browser and reset on reload."
+        : "⚠ Offline mode - the wallet runs with demo data saved in your browser.";
     }
 
     /* On a published copy (static build or a public host) there is no Flask
@@ -534,15 +545,11 @@
   let LS_ACCT = null;
   function loadWallet() {
     if (!ON_FLASK) return loadWalletLocal();
-    api("/api/wallet").then(walletRender).catch(() => loadWalletLocal(true));
+    api("/api/wallet").then(walletRender).catch(() => loadWalletLocal());
   }
-  /* reach=true means we are on a real page but there is no API behind it,
-     which is the case for the published static copy */
-  function loadWalletLocal(reach) {
-    if (reach) {
-      $("#wMode").innerHTML = "&#9432; <b>Demo mode</b> - this copy is published as a plain website, " +
-        "so transfers are kept in your browser and reset on reload.";
-    }
+  /* the demo accounts. buildUI() already explains in #wMode why the wallet
+     is not backed by the real API, so nothing to say here. */
+  function loadWalletLocal() {
     if (!LS_ACCT) {
       LS_ACCT = [
         { id: 1, name: "Demo User", email: "user1@example.com", balance: 12500 },
