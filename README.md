@@ -125,7 +125,6 @@ WORKSPACE_ROOT=/path/to/your/projects python build_catalog.py
 ├── build_catalog.py    ← workspace scan → data/projects.json
 ├── run.bat             ← one click launcher
 ├── requirements.txt
-├── LICENSE             ← MIT
 ├── .env.example        ← copy to .env (git-ignored)
 ├── .gitignore
 │
@@ -171,6 +170,3 @@ Ya app me **About → Rescan workspace**. Kuch manual karne ki zaroorat nahi.
 **Frontend:** HTML5, CSS3 (custom properties, glassmorphism), Vanilla JS
 **Data:** JSON catalogue + SQLite
 
----
-
-*MIT licensed.*
