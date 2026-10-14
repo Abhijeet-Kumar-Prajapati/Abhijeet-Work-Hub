@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" data-hub-mode="{{ 'public' if public_mode else 'local' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ app_title }}</title>
+<meta name="description" content="Every project in one place - Flask apps, AI assistants, web projects and Android apps.">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text y='72' x='50' text-anchor='middle' font-size='52' fill='white' font-family='sans-serif' font-weight='bold'>A</text></svg>">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ==================================================== sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-text">
+        <b>{{ app_title }}</b>
+        <span>{{ owner }}</span>
+      </div>
+    </div>
+
+    <div class="nav-label">Navigate</div>
+    <div class="nav-item active" data-view="dashboard"><span class="ico">◈</span> Dashboard</div>
+    <div class="nav-item" data-view="projects"><span class="ico">▦</span> Projects <span class="count" id="cProjects">0</span></div>
+    <div class="nav-item" data-view="demos"><span class="ico">▶</span> Live Demos</div>
+    <div class="nav-item" data-view="code"><span class="ico">⌘</span> Code Browser</div>
+    <div class="nav-item" data-view="skills"><span class="ico">◑</span> Skills</div>
+    <div class="nav-item" data-view="about"><span class="ico">◎</span> About</div>
+
+    <div class="side-foot">
+      <div class="mini">
+        <b id="fProjects">0</b> projects<br>
+        <b id="fFiles">0</b> files scanned<br>
+        <span id="fGen">-</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================================================== main -->
+  <main class="main">
+
+    {% if public_mode %}
+    <div class="standalone-banner" style="background:rgba(34,197,94,.09);border-color:rgba(34,197,94,.3);color:#86efac">
+      &#128274; <b>Public mode</b> is on - the code browser and rescan are switched off.
+    </div>
+    {% endif %}
+
+    <!-- ------------------------------------------- DASHBOARD -->
+    <section class="view active" id="v-dashboard">
+      <div class="hero">
+        <div class="badge"><span class="dot"></span> All the work, one place</div>
+        <h1>{% if owner and owner in app_title %}{{ app_title }}{% elif owner %}{{ owner }}'s <span>{{ app_title }}</span>{% else %}<span>{{ app_title }}</span>{% endif %}</h1>
+        <p>Every app, website, Android app and AI project in one collection -
+           scanned straight from disk, organised, and running live right here.</p>
+        <div class="hero-actions">
+          <button class="btn primary" data-go="projects">▦ Browse all projects</button>
+          <button class="btn" data-go="demos">▶ Open live demos</button>
+        </div>
+      </div>
+
+      <div class="stats" id="dashStats"></div>
+
+      <div class="section-title"><span class="ico">★</span> Featured work <small>the biggest ones</small></div>
+      <div class="grid" id="featured"></div>
+
+      <div class="section-title"><span class="ico">▦</span> All categories</div>
+      <div class="grid" id="catCards"></div>
+    </section>
+
+    <!-- ------------------------------------------- PROJECTS -->
+    <section class="view" id="v-projects">
+      <div class="page-head">
+        <h1>Projects</h1>
+        <p>Everything found on disk. Click any card for the full breakdown.</p>
+      </div>
+
+      <input class="search" id="search" placeholder="&#9906;  Search by name, tech or description...">
+      <div class="filters" id="filters"></div>
+      <div class="grid" id="allProjects"></div>
+      <div class="empty" id="noResult" style="display:none">
+        <div class="e">&#128269;</div>
+        <div>Nothing matches that search.</div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------- DEMOS -->
+    <section class="view" id="v-demos">
+      <div class="page-head">
+        <h1>Live Demos</h1>
+        <p>Real, working versions of my projects - rebuilt to run right here in the browser.</p>
+      </div>
+
+      <div class="tabs" id="demoTabs">
+        <button class="tab on" data-demo="calculator">🧮 Calculator</button>
+        <button class="tab" data-demo="player">🎬 Media Player</button>
+        <button class="tab" data-demo="todo">✅ To-Do List</button>
+        <button class="tab" data-demo="wallet">💳 PayPal Wallet</button>
+      </div>
+
+      <!-- calculator -->
+      <div class="demo-wrap" id="demo-calculator">
+        <div class="calc">
+          <div class="calc-out">
+            <div class="expr" id="cExpr">&nbsp;</div>
+            <div class="val" id="cVal">0</div>
+          </div>
+          <div class="calc-grid" id="calcGrid"></div>
+        </div>
+      </div>
+
+      <!-- media player -->
+      <div class="demo-wrap" id="demo-player" style="display:none">
+        <div class="player-stage">
+          <video id="vid"></video>
+          <div class="ph" id="vidPh"><div class="big">&#127916;</div>Choose a video or audio file</div>
+        </div>
+        <input type="file" id="vidFile" accept="video/*,audio/*" style="display:none">
+        <div class="player-bar">
+          <button class="pbtn" id="vBack" title="Back 10s">&#9198;</button>
+          <button class="pbtn big" id="vPlay">&#9654;</button>
+          <button class="pbtn" id="vFwd" title="Forward 10s">&#9197;</button>
+          <div class="prog"><input type="range" id="vSeek" value="0" min="0" max="1000"></div>
+          <span class="ptime" id="vTime">0:00 / 0:00</span>
+          <button class="pbtn" id="vMute" title="Mute">&#128266;</button>
+          <button class="btn" id="vPick">&#128193; Open file</button>
+        </div>
+      </div>
+
+      <!-- todo -->
+      <div class="demo-wrap" id="demo-todo" style="display:none">
+        <div class="todo">
+          <div class="todo-input">
+            <input id="tdIn" placeholder="What needs doing?" maxlength="90">
+            <button id="tdAdd">Add</button>
+          </div>
+          <ul class="tlist" id="tdList"></ul>
+          <p style="color:var(--faint);font-size:12px;margin-top:12px" id="tdCount"></p>
+        </div>
+      </div>
+
+      <!-- wallet -->
+      <div class="demo-wrap" id="demo-wallet" style="display:none">
+        <div class="note" id="wMode">&#9432; Running on the live Flask API with SQLite storage.</div>
+        <div class="wallet">
+          <div>
+            <h4 style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:12px">Accounts</h4>
+            <div class="accounts" id="wAccts"></div>
+            <h4 style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin:22px 0 12px">Recent transfers</h4>
+            <ul class="txn" id="wHist"></ul>
+            <button class="btn" id="wReset" style="margin-top:12px">&#8635; Reset demo</button>
+          </div>
+          <div>
+            <h4 style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:12px">Send money</h4>
+            <div class="frow"><label>From</label><select id="wFrom"></select></div>
+            <div class="frow"><label>To</label><select id="wTo"></select></div>
+            <div class="frow"><label>Amount (&#8377;)</label><input id="wAmt" type="number" min="1" step="1" value="500"></div>
+            <div class="frow"><label>Note</label><input id="wNote" placeholder="For chai &#128563;" maxlength="60"></div>
+            <button class="btn primary" id="wSend" style="width:100%;justify-content:center">&#128179; Send money</button>
+            <div class="msg" id="wMsg"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------- CODE -->
+    <section class="view" id="v-code">
+      <div class="page-head">
+        <h1>Code Browser</h1>
+        <p>Real source files read straight from my folders on disk.</p>
+      </div>
+      <div class="code-bar">
+        <select id="cbProj"><option>Loading projects...</option></select>
+        <button class="btn" id="cbOpen">&#128193; Open</button>
+      </div>
+      <div class="code-bar" id="cbFileBar" style="display:none">
+        <select id="cbFile" style="flex:2"><option>Select a file</option></select>
+        <button class="btn" id="cbCopy">&#10697; Copy</button>
+        <span class="ptime" id="cbInfo"></span>
+      </div>
+      <div id="cbOut"><div class="empty"><div class="e">&#128196;</div>Pick a project to browse its files.</div></div>
+    </section>
+
+    <!-- ------------------------------------------- SKILLS -->
+    <section class="view" id="v-skills">
+      <div class="page-head">
+        <h1>Skills &amp; Tech</h1>
+        <p>Languages and tools I actually use across the projects.</p>
+      </div>
+      <div class="grid" id="skillGrid"></div>
+      <div class="section-title"><span class="ico">◷</span> Project timeline <small>latest first</small></div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- ------------------------------------------- ABOUT -->
+    <section class="view" id="v-about">
+      <div class="page-head">
+        <h1>About this hub</h1>
+        <p>What this software is and how it was made.</p>
+      </div>
+
+      <div class="grid">
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#9881;</div>
+            <div><h3>What is this?</h3><div class="cat">Overview</div></div></div>
+          <p>One single software that puts every project I have ever written into a single
+             place. Instead of hunting through folders, everything is scanned,
+             sorted and shown here.</p>
+          <div class="pills">
+            <span class="pill">Python</span><span class="pill">Flask</span>
+            <span class="pill">HTML</span><span class="pill">CSS</span>
+            <span class="pill">JavaScript</span><span class="pill">SQLite</span>
+          </div>
+        </div>
+
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#128190;</div>
+            <div><h3>How it works</h3><div class="cat">Architecture</div></div></div>
+          <p><b>build_catalog.py</b> walks my folders and writes data/projects.json.
+             <b>app.py</b> is the Flask backend that serves that data, reads source
+             files and powers the live wallet. The frontend renders it all.</p>
+        </div>
+
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#9889;</div>
+            <div><h3>Two ways to run</h3><div class="cat">Flexible</div></div></div>
+          <p>Start <b>app.py</b> for the full experience with a live database.
+             Or just double-click <b>templates/index.html</b> - it still works
+             using the bundled catalogue, with the wallet in offline demo mode.</p>
+        </div>
+
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#128260;</div>
+            <div><h3>Always in sync</h3><div class="cat">Fresh</div></div></div>
+          <p>Finished something new? Run <b>python build_catalog.py</b> (or press
+             Rescan below) and it appears here immediately - no manual editing.</p>
+        </div>
+      </div>
+
+      <div class="section-title"><span class="ico">&#128274;</span> Privacy and safety</div>
+      <div class="grid">
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#128274;</div>
+            <div><h3>Nothing private is published</h3><div class="cat">Privacy</div></div></div>
+          <p>The catalogue only ever stores <b>relative</b> paths. No absolute
+             path, no user name and no email address is written into
+             <code>data/projects.json</code> or sent to the browser.</p>
+        </div>
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#128273;</div>
+            <div><h3>Jailed file reader</h3><div class="cat">Security</div></div></div>
+          <p>The code browser refuses <code>..</code> traversal, drive letters,
+             UNC paths and null bytes, and resolves symlinks before checking
+             the target is still inside the workspace.</p>
+        </div>
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#128290;</div>
+            <div><h3>Binds to localhost</h3><div class="cat">Network</div></div></div>
+          <p>The server listens on <code>127.0.0.1</code> only, so it is not
+             reachable from other machines unless you deliberately change
+             <code>HOST</code>. Set <code>HUB_MODE=public</code> to also
+             disable the file reader and rescan.</p>
+        </div>
+        <div class="card" style="cursor:default">
+          <div class="card-head"><div class="card-ico">&#9919;</div>
+            <div><h3>Hardened headers</h3><div class="cat">Defense in depth</div></div></div>
+          <p>Every response carries a Content-Security-Policy, nosniff,
+             X-Frame-Options DENY, no-referrer and a restrictive permissions
+             policy. Mutating endpoints are rate limited.</p>
+        </div>
+      </div>
+
+      <div class="section-title"><span class="ico">&#9881;</span> Reset and reconfigure</div>
+      <div class="card" style="cursor:default">
+        <p style="min-height:0">The name shown in the title bar comes from
+           <code>OWNER_NAME</code> and <code>APP_TITLE</code> in your
+           <code>.env</code> file. Copy <code>.env.example</code> to
+           <code>.env</code> to change it - <code>.env</code> is git-ignored
+           so it stays private.</p>
+        <div style="margin-top:12px"><button class="btn" id="rescan">&#8635; Rescan workspace</button></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ==================================================== modal -->
+<div class="modal" id="modal">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script id="catalog-data" type="application/json">{{ catalog | tojson }}</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

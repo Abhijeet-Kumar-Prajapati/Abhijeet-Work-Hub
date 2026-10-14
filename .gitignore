@@ -1,0 +1,38 @@
+# ---------------------------------------------------------- secrets
+.env
+*.secret
+data/.secret_key
+
+# ---------------------------------------------------------- local data
+# Regenerated on every run - never commit these
+data/hub.db
+data/projects.local.json
+
+# ---------------------------------------------------------- python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# ---------------------------------------------------------- logs
+*.log
+logs/
+
+# ---------------------------------------------------------- editors / OS
+.vscode/
+.idea/
+.cursor/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---------------------------------------------------------- build output
+node_modules/
+dist/
+build/
+*.spec

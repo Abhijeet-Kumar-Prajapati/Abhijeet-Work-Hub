@@ -1,0 +1,551 @@
+{
+  "meta": {
+    "app": "Abhijeet Work Hub",
+    "owner": "Abhijeet",
+    "generated": "2026-10-15 00:37",
+    "categories": 5,
+    "projects": 21,
+    "files": 1362,
+    "kb": 2812,
+    "workspace_set": true
+  },
+  "categories": [
+    {
+      "id": "fullstack",
+      "title": "Full Stack Apps",
+      "color": "#6366f1",
+      "projects": [
+        {
+          "id": "paypal-clone",
+          "title": "PayPal Clone",
+          "desc": "A working money-transfer web app. Register, log in, send money to any user and watch the transaction history update in real time.",
+          "tech": [
+            "Python",
+            "Flask",
+            "SQLite",
+            "SQLAlchemy",
+            "Flask-Login",
+            "WTForms",
+            "Jinja2"
+          ],
+          "features": [
+            "Email registration and login via Flask-Login",
+            "Werkzeug password hashing",
+            "Send money with balance validation",
+            "Per-user transaction history",
+            "CSRF protection through Flask-WTF",
+            "Custom 404 and 500 error pages"
+          ],
+          "exists": true,
+          "files": 225,
+          "kb": 463,
+          "date": "2025-02-02",
+          "demo": "wallet",
+          "entry": "app.py",
+          "highlight": true,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet"
+        },
+        {
+          "id": "charvis-ai",
+          "title": "Charvis AI Assistant",
+          "desc": "A Jarvis-style desktop voice assistant with an Iron Man themed GUI. Listens to commands, speaks back, controls the PC and plays media.",
+          "tech": [
+            "Python",
+            "customtkinter",
+            "SpeechRecognition",
+            "pyttsx3",
+            "pycaw",
+            "PyTube",
+            "pyjokes",
+            "wikipedia",
+            "wolframalpha",
+            "win10toast"
+          ],
+          "features": [
+            "Offline and online voice command recognition",
+            "Text to speech with male and female voices",
+            "System volume control through pycaw",
+            "YouTube search, streaming and download",
+            "Wikipedia and WolframAlpha answers",
+            "Windows toast notifications",
+            "Auto-restart if the process crashes"
+          ],
+          "exists": true,
+          "files": 225,
+          "kb": 463,
+          "date": "2025-02-02",
+          "demo": null,
+          "entry": "charvis_ai.py",
+          "highlight": true,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet"
+        },
+        {
+          "id": "voice-assistant",
+          "title": "Voice Assistant Core",
+          "desc": "The recognition and speech engine behind the assistant, tuned with adaptive energy thresholds so it reacts faster in noisy rooms.",
+          "tech": [
+            "Python",
+            "pyttsx3",
+            "SpeechRecognition",
+            "logging"
+          ],
+          "features": [
+            "Adaptive energy threshold",
+            "Tuned pause and phrase thresholds",
+            "Microphone auto-detection",
+            "Project manager integration"
+          ],
+          "exists": true,
+          "files": 225,
+          "kb": 463,
+          "date": "2025-02-02",
+          "demo": null,
+          "entry": "voice_assistant.py",
+          "highlight": false,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet"
+        },
+        {
+          "id": "charvis-launcher",
+          "title": "Charvis Auto-Launcher",
+          "desc": "A Windows startup launcher that boots the assistant with the correct virtual environment and restarts it automatically after a crash.",
+          "tech": [
+            "Python",
+            "subprocess",
+            "tkinter",
+            "logging"
+          ],
+          "features": [
+            "Auto-detect the venv interpreter",
+            "Crash detection and restart loop",
+            "Startup log file",
+            "Desktop shortcut creator"
+          ],
+          "exists": true,
+          "files": 225,
+          "kb": 463,
+          "date": "2025-02-02",
+          "demo": null,
+          "entry": "start_charvis.pyw",
+          "highlight": false,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet"
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "title": "Web Projects",
+      "color": "#0ea5e9",
+      "projects": [
+        {
+          "id": "media-player",
+          "title": "Universal Media Player",
+          "desc": "A single-file media player that handles audio and video with a clean 16:9 stage, playlist and playback controls.",
+          "tech": [
+            "HTML",
+            "CSS",
+            "JavaScript"
+          ],
+          "features": [
+            "Audio and video playback",
+            "16:9 responsive stage",
+            "Custom control bar",
+            "Playlist support"
+          ],
+          "exists": false,
+          "files": 0,
+          "kb": 0,
+          "date": null,
+          "demo": "player",
+          "entry": "player.html",
+          "highlight": true,
+          "subpath": "player.html"
+        },
+        {
+          "id": "calculator",
+          "title": "Calculator",
+          "desc": "A grid based calculator with a live display, built with clean HTML, CSS and vanilla JavaScript.",
+          "tech": [
+            "HTML",
+            "CSS",
+            "JavaScript"
+          ],
+          "features": [
+            "4 column button grid",
+            "Live expression display",
+            "Error handling"
+          ],
+          "exists": true,
+          "files": 3,
+          "kb": 1,
+          "date": "2025-04-12",
+          "demo": "calculator",
+          "entry": "HTML Structure.html",
+          "highlight": false,
+          "subpath": "try code/projact wab develpor/CALCULATOR"
+        },
+        {
+          "id": "blogging-platform",
+          "title": "Blogging Platform",
+          "desc": "The front end of a blogging platform that pulls live posts from the GitHub API using fetch().",
+          "tech": [
+            "HTML",
+            "JavaScript",
+            "GitHub API",
+            "fetch()"
+          ],
+          "features": [
+            "Live GitHub API fetch",
+            "Backend and frontend split",
+            "Async rendering"
+          ],
+          "exists": true,
+          "files": 3,
+          "kb": 0,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "frontdevepoler.html",
+          "highlight": false,
+          "subpath": "try code/projact wab develpor/BLOGGING PLATFORM"
+        },
+        {
+          "id": "portfolio",
+          "title": "Portfolio Page",
+          "desc": "A personal portfolio layout built to showcase projects and skills.",
+          "tech": [
+            "HTML",
+            "CSS"
+          ],
+          "features": [
+            "Responsive layout",
+            "Project grid",
+            "Skills section"
+          ],
+          "exists": true,
+          "files": 2,
+          "kb": 2,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "HTML Structure.html",
+          "highlight": false,
+          "subpath": "try code/projact wab develpor/PORTFOLIO"
+        },
+        {
+          "id": "tribute-page",
+          "title": "Tribute Page",
+          "desc": "A tribute page layout dedicated to a person, with a hero section and a biography block.",
+          "tech": [
+            "HTML",
+            "CSS"
+          ],
+          "features": [
+            "Hero section",
+            "Biography layout",
+            "Responsive"
+          ],
+          "exists": true,
+          "files": 2,
+          "kb": 1,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "index.html",
+          "highlight": false,
+          "subpath": "try code/projact wab develpor/TRIBUTE PAGE"
+        },
+        {
+          "id": "landing-page",
+          "title": "Landing Pages",
+          "desc": "A marketing landing page with a hero section, call to action and feature blocks.",
+          "tech": [
+            "HTML",
+            "CSS"
+          ],
+          "features": [
+            "Hero and CTA",
+            "Feature grid",
+            "Responsive"
+          ],
+          "exists": true,
+          "files": 2,
+          "kb": 0,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "index.html",
+          "highlight": false,
+          "subpath": "try code/projact wab develpor/LANDING PAGE"
+        },
+        {
+          "id": "login-pages",
+          "title": "Login and Logo Pages",
+          "desc": "A batch of login screens, logo layouts and web form studies built while learning HTML structure.",
+          "tech": [
+            "HTML",
+            "CSS"
+          ],
+          "features": [
+            "Multiple layouts",
+            "Form studies",
+            "Logo experiments"
+          ],
+          "exists": true,
+          "files": 5,
+          "kb": 16,
+          "date": "2025-03-13",
+          "demo": null,
+          "entry": "LOG.HTML",
+          "highlight": false,
+          "subpath": "try code/HTML/html logo code"
+        }
+      ]
+    },
+    {
+      "id": "android",
+      "title": "Android Apps",
+      "color": "#22c55e",
+      "projects": [
+        {
+          "id": "alarm-clock",
+          "title": "Alarm Clock App",
+          "desc": "A native Android alarm clock written in Kotlin, with a home screen and a dedicated alarm setting screen.",
+          "tech": [
+            "Kotlin",
+            "Android"
+          ],
+          "features": [
+            "Home screen activity",
+            "Alarm setting activity",
+            "Multi-activity navigation"
+          ],
+          "exists": true,
+          "files": 2,
+          "kb": 1,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "Home Screen Activity.kt",
+          "highlight": true,
+          "subpath": "try code/ANDROID APP DEVELOPMENT/ALARM CLOCK APP"
+        },
+        {
+          "id": "university-attendance",
+          "title": "University Attendance",
+          "desc": "An attendance tracker that stores student records in Firebase Firestore in real time.",
+          "tech": [
+            "JavaScript",
+            "Firebase",
+            "Firestore"
+          ],
+          "features": [
+            "Firebase config",
+            "Real-time database",
+            "Attendance records"
+          ],
+          "exists": true,
+          "files": 2,
+          "kb": 3,
+          "date": "2025-04-16",
+          "demo": null,
+          "entry": "App .js",
+          "highlight": false,
+          "subpath": "try code/ANDROID APP DEVELOPMENT/UNIVERSITY ATTENDANCE APP"
+        },
+        {
+          "id": "todo-list",
+          "title": "To-Do List App",
+          "desc": "A task manager with add, complete and delete, styled with its own CSS theme.",
+          "tech": [
+            "HTML",
+            "CSS",
+            "JavaScript"
+          ],
+          "features": [
+            "Add, complete and delete tasks",
+            "Persistent list",
+            "Custom CSS"
+          ],
+          "exists": true,
+          "files": 3,
+          "kb": 1,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "Structure.html",
+          "highlight": false,
+          "subpath": "try code/ANDROID APP DEVELOPMENT/TO-DO LIST APP"
+        },
+        {
+          "id": "quote-of-day",
+          "title": "Quote of the Day",
+          "desc": "A motivational quote app that fetches a fresh quote on every open.",
+          "tech": [
+            "JavaScript",
+            "API"
+          ],
+          "features": [
+            "Random quote fetch",
+            "Share a quote",
+            "Refresh on launch"
+          ],
+          "exists": true,
+          "files": 1,
+          "kb": 1,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "react.js",
+          "highlight": false,
+          "subpath": "try code/ANDROID APP DEVELOPMENT/QUOTE OF THE DAY APP"
+        },
+        {
+          "id": "window-notification",
+          "title": "Desktop Notification",
+          "desc": "A small Python utility that fires native Windows notifications from the desktop.",
+          "tech": [
+            "Python",
+            "Tkinter"
+          ],
+          "features": [
+            "Native toast popup",
+            "Runs standalone"
+          ],
+          "exists": true,
+          "files": 1,
+          "kb": 1,
+          "date": "2025-04-12",
+          "demo": null,
+          "entry": "Design a Notification Window.py",
+          "highlight": false,
+          "subpath": "try code/ANDROID APP DEVELOPMENT/WINDOW NOTIFICATION USING JAVA CODE"
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "title": "AI Projects",
+      "color": "#a855f7",
+      "projects": [
+        {
+          "id": "computer-vision",
+          "title": "Computer Vision Study",
+          "desc": "An early look at computer vision and image based learning in Python.",
+          "tech": [
+            "Python",
+            "AI"
+          ],
+          "features": [
+            "Image processing basics",
+            "Python scripting"
+          ],
+          "exists": true,
+          "files": 1,
+          "kb": 0,
+          "date": "2025-04-16",
+          "demo": null,
+          "entry": "computer.py",
+          "highlight": false,
+          "subpath": "try code/Artificial Intelligence/computer.py"
+        },
+        {
+          "id": "ai-lab",
+          "title": "AI Lab Experiments",
+          "desc": "A folder of AI experiments covering search, parsing and dataset handling.",
+          "tech": [
+            "Python",
+            "AI",
+            "Data"
+          ],
+          "features": [
+            "Dataset handling",
+            "Parsing experiments",
+            "Pattern and number problems",
+            "Text processing"
+          ],
+          "exists": true,
+          "files": 15,
+          "kb": 87,
+          "date": "2025-01-27",
+          "demo": null,
+          "entry": "Artificial Intelligence..py",
+          "highlight": false,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet/PYTHON/---projaect 2"
+        },
+        {
+          "id": "research-pages",
+          "title": "Interactive Research Pages",
+          "desc": "A set of self-contained research pages: AI search, graph analysis, human studies and study material.",
+          "tech": [
+            "HTML",
+            "CSS",
+            "JavaScript"
+          ],
+          "features": [
+            "AI search engine",
+            "Graph visualisation",
+            "Study material viewer",
+            "Standalone test suite"
+          ],
+          "exists": true,
+          "files": 38,
+          "kb": 274,
+          "date": "2025-01-31",
+          "demo": null,
+          "entry": "ai-search.html",
+          "highlight": false,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet/HTML"
+        }
+      ]
+    },
+    {
+      "id": "practice",
+      "title": "Practice and Learning",
+      "color": "#f59e0b",
+      "projects": [
+        {
+          "id": "python-practice",
+          "title": "Python Practice (150+ files)",
+          "desc": "Fourteen practice sets covering Python from print() through to inheritance, decorators, recursion and file handling.",
+          "tech": [
+            "Python"
+          ],
+          "features": [
+            "Lists, dicts, sets and tuples",
+            "OOP, inheritance and operator overloading",
+            "File handling with and try-finally",
+            "Recursion and lambdas",
+            "Matrix maths and number theory"
+          ],
+          "exists": true,
+          "files": 157,
+          "kb": 109,
+          "date": "2025-01-27",
+          "demo": null,
+          "entry": "learn code 14\\map-filter-reduce.py",
+          "highlight": true,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet/PYTHON"
+        },
+        {
+          "id": "language-basics",
+          "title": "Language Basics",
+          "desc": "Starter practice in C, C++, Java, JavaScript and CSS.",
+          "tech": [
+            "C",
+            "C++",
+            "Java",
+            "JavaScript",
+            "CSS"
+          ],
+          "features": [
+            "C and C++ basics",
+            "Java programs",
+            "Node and Express server",
+            "CSS styling"
+          ],
+          "exists": true,
+          "files": 225,
+          "kb": 463,
+          "date": "2025-02-02",
+          "demo": null,
+          "entry": "CSS",
+          "highlight": false,
+          "subpath": "try code/abhijeet fro/abhijeet fro/abhijeet"
+        }
+      ]
+    }
+  ]
+}
